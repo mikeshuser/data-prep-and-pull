@@ -133,6 +133,15 @@ def norm_apostrophe(raw_text):
     text = re.sub(r"`", "'", text)
     return text
 
+def remove_html(raw_text):
+    """
+    Remove html tags
+    """
+    text = str(raw_text)
+    cleaner = re.compile('<.*?>')
+    text = re.sub(cleaner, '', text)
+    return text
+
 def remove_non_alpha(raw_text):
     """
     Remove all non-letters
