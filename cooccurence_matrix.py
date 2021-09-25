@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-@author: MikeShuser
 Generate co-occurrence matrix from a text corpus.
 Useful for some visualizations as well as network graph analysis. 
 
@@ -8,12 +7,18 @@ dependencies:
     numpy >= 1.17
     pandas >= 0.23
 """
+
+__author__ = "Mike Shuser"
+
 from collections import Counter
 import pandas as pd
 
-def get_coocc_matrix(corpus: list, 
+def get_coocc_matrix(
+    corpus: list, 
     window: int,
-    vocab_subset: list = []) -> pd.DataFrame:
+    vocab_subset: list = []
+) -> pd.DataFrame:
+
     """
     Calculate the co-occurence matrix of a text corpus
 
@@ -25,7 +30,7 @@ def get_coocc_matrix(corpus: list,
         some words, ie. stop words
     """
 
-    joined = ' '.join([' '.join(line) for line in corpus])
+    joined = ' '.join(corpus)
     context_words = set(joined.split())
 
     if vocab_subset == []:
@@ -33,13 +38,11 @@ def get_coocc_matrix(corpus: list,
     else:
         vocab = set(vocab_subset)
 
-    co_occ = {key : Counter({val : 0 for word in context_words if word != key})
+    co_occ = {key : Counter({val : 0 for val in context_words if val != key})
         for key in vocab}
 
-    for sent
-
     for doc in corpus:
-        word_list = split(doc)
+        word_list = doc.split()
         for i in range(len(word_list)):
             if word_list[i] in vocab:
                 if i < window:
@@ -60,7 +63,7 @@ def get_coocc_matrix(corpus: list,
                     del c[word_list[i]]
                     co_occ[word_list[i]] = co_occ[word_list[i]] + c
 
-
     co_occ = {word : dict(co_occ[word]) for word in vocab}
+    
     return pd.DataFrame.from_dict(co_occ, orient='index')
 
