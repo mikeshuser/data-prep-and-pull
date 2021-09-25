@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-@author: MikeShuser
 Module housing some useful functions for machine learning
 
 dependencies: 
@@ -8,18 +7,26 @@ dependencies:
     pandas >= 0.23
     sklearn >= 0.21.2
 """
+
+__author__ = "Mike Shuser"
+
 import random
 import os
 import numpy as np
 import pandas as pd
 
-def get_sample_weights(labels: pd.Series, ndx_subset: list = []):
+def get_sample_weights(
+    labels: pd.Series, 
+    ndx_subset: list = []
+) -> pd.Series:
+
     """
     Return a Series of weights that results in an equal-weighted 
         class distribution
     ndx_subset(optional): pass an index list to filter the label series 
         into some desired subset 
     """
+
     #filter the label series if applicable
     if ndx_subset != []:
         y = labels.loc[ndx_subset].copy()
@@ -33,13 +40,17 @@ def get_sample_weights(labels: pd.Series, ndx_subset: list = []):
 
     return y.replace(weights)
 
-def partition_class(y_col: pd.Series, 
+def partition_class(
+    y_col: pd.Series, 
     ratio: list = [80, 10, 10],
-    remove_nan: bool = False):
+    remove_nan: bool = False
+) -> pd.Series:
+
     """
     Split a target or output series into train/val/test partitions, 
         following the same distribution as 'ratio' arg
     """
+
     assert sum(ratio) == 100, "ratio needs to sum to 100"
 
     labels = pd.Series(index=y_col.index, dtype=str)
@@ -81,7 +92,8 @@ def partition_class(y_col: pd.Series,
 
     return labels
 
-def interactions_ignore_nan(df: pd.DataFrame, level=2):
+def interactions_ignore_nan(df: pd.DataFrame, level=2) -> pd.DataFrame:
+
     """
     Expand a feature matrix with multiplicative interactions
     Feature combinations can be 2(default) or 3 variables
@@ -90,6 +102,7 @@ def interactions_ignore_nan(df: pd.DataFrame, level=2):
     caution: be careful on which dataframes you run this function.
         It can explode your feature dimensions and/or cause memory overflow
     """
+
     from itertools import combinations
     
     columns = df.columns.tolist()
@@ -108,20 +121,25 @@ def interactions_ignore_nan(df: pd.DataFrame, level=2):
  
     return tmp_df
 
-def find_random_seed(X, Y, split: float = 0.2, attempts: int = 10):
+def find_random_seed(X, Y, split: float = 0.2, attempts: int = 10) -> int:
+
     """
     Search for a seed that produces a desired class distribution 
         from train_test_split
 
     assumes Y == {0,1} 
     """
+
     from sklearn.model_selection import train_test_split
     
     for i in range(10):
         seed = random.randint(1,100)
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, 
-                                                            test_size=split, 
-                                                            random_state=seed)
+        X_train, X_test, Y_train, Y_test = train_test_split(
+            X, 
+            Y, 
+            test_size=split, 
+            random_state=seed
+        )
         
         #ratio of 1 means train/test have equal distribution
         #ratio > 1 means positive class in train > test, and vice versa  
@@ -135,11 +153,13 @@ def find_random_seed(X, Y, split: float = 0.2, attempts: int = 10):
             break
     return seed
 
-def import_embeddings(filepath: str):
+def import_embeddings(filepath: str) -> dict:
+
     """
     Import word embeddings txt file (space separated) into a dict
     Used for word2vec, glove embeddings 
     """
+
     vecs = {}
     with open(filepath, encoding='utf-8') as f:
         for line in f:
@@ -149,10 +169,12 @@ def import_embeddings(filepath: str):
             vecs[word] = emb
     return vecs
     
-def shuffle_in_unison(n_arraylikes: list):
+def shuffle_in_unison(n_arraylikes: list) -> list:
+
     """
     Shuffle multiple arrays of equal length in the same order
     """
+
     array_len = len(n_arraylikes[0])
     for arr in n_arraylikes:
         assert len(arr) == array_len
