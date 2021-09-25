@@ -1,6 +1,5 @@
 # -*- coding : utf-8 -*-
 """
-@author : MikeShuser
 Convenience module for pre-processing text for NLP
 Some funcs depend on spacy and textblob libraries
 
@@ -8,6 +7,8 @@ Some funcs depend on spacy and textblob libraries
     However, with modern Transformer architectures, most of these text 
     pre-processing steps are no longer necessary.
 """
+
+__author__ = "Mike Shuser"
 
 import re
 from textblob import TextBlob
@@ -25,7 +26,8 @@ punct_and_sym = [',', '.', "'", '"', ':', ')', '(', '-', '|', ';', "'", '$',
     '♪', '╩', '╚', '³', '・', '╦', '╣', '╔', '╗', '▬', '❤', 
     'ï', 'Ø', '¹', '≤', '‡', '√', '?', '!', '#']
 
-contraction_dict = {"ain't" : "is not", 
+contraction_dict = {
+    "ain't" : "is not", 
     "aren't" : "are not",
     "can't" : "cannot", 
     "could've" : "could have", 
@@ -91,70 +93,96 @@ contraction_dict = {"ain't" : "is not",
     "you'd" : "you would", 
     "you'll" : "you will", 
     "you're" : "you are", 
-    "you've" : "you have"}
+    "you've" : "you have",
+}
 
-encoding_symbols = ["\x84", "\x85", "\x90", "\x91", "\x93", 
-    "\x94", "\x95", "\x96", "\x97", "\x98", "\x99"]
+encoding_symbols = [
+    "\x84", 
+    "\x85", 
+    "\x90", 
+    "\x91", 
+    "\x93", 
+    "\x94", 
+    "\x95", 
+    "\x96", 
+    "\x97", 
+    "\x98", 
+    "\x99",
+]
                 
-def clean_puncts(raw_text):
+def clean_puncts(raw_text: str) -> str:
+
     """
     Simple removal of all punctuation and symbols from punct_and_sym
-    """     
+    """
+
     text = str(raw_text)
-    for punct in puncts:
+    for punct in punct_and_sym:
         if punct in text:
             text = text.replace(punct, ' ')
     return text
 
-def expand_contractions(raw_text):
+def expand_contractions(raw_text: str) -> str:
+
     """
     Expand all contractions in contraction_dict
     """
+
     text = str(raw_text).lower()
     for k, v in contraction_dict.items():
         text = re.sub(k, v, text)
     return text
 
-def remove_special_chars(raw_text):
+def remove_special_chars(raw_text: str) -> str:
+
     """
     Remove certain special characters if French encoding causing trouble
     """
+
     text = str(raw_text)
     for sym in encoding_symbols:
         text = re.sub(r"{}".format(sym), " ", text)
     return text
 
-def norm_apostrophe(raw_text):
+def norm_apostrophe(raw_text: str) -> str:
+
     """
     Normalize apostrophes to standard form
     """
+
     text = str(raw_text)
     text = re.sub(r"’", "'", text)
     text = re.sub(r"`", "'", text)
     return text
 
-def remove_html(raw_text):
+def remove_html(raw_text: str) -> str:
+
     """
     Remove html tags
     """
+
     text = str(raw_text)
     cleaner = re.compile('<.*?>')
     text = re.sub(cleaner, '', text)
     return text
 
-def remove_non_alpha(raw_text):
+def remove_non_alpha(raw_text: str) -> str:
+
     """
     Remove all non-letters
     """
+
     text = str(raw_text).lower()
     text = re.sub("[^a-z]", " ", text)
     return text
     
-def replace_nums(raw_text, remove=False):
+def replace_nums(raw_text: str, remove=False) -> str:
+
     """
     Either replace all numbers with # placeholders of varying length,
     or convert numbers to words
     """
+
     text = str(raw_text)
     if remove:
         text = re.sub('[0-9]{5,}', '#####', text)
@@ -176,19 +204,23 @@ def replace_nums(raw_text, remove=False):
         text = re.sub(r"10", "ten", text)
     return text
 
-def delete_nums(raw_text, remove=False):
+def delete_nums(raw_text: str) -> str:
+
     """
     delete all numeric values
     """
+
     text = str(raw_text)
     text = re.sub('[0-9]', ' ', text)
     return text
 
-def lemmatize(raw_text: str, spacy_nlp, exceptions=[]):
+def lemmatize(raw_text: str, spacy_nlp, exceptions=[]) -> str:
+
     """
     lemmatize all words in string, skipping over optional exceptions list
     requires nlp object from spacy module
     """
+
     despaced = ' '.join(raw_text.split())
     lemmas = []
     for word in spacy_nlp(despaced):
@@ -198,54 +230,66 @@ def lemmatize(raw_text: str, spacy_nlp, exceptions=[]):
             lemmas.append(word.lemma_)
     return ' '.join(lemmas)
 
-def remove_stop(raw_text:str, spacy_nlp):
+def remove_stop(raw_text: str, spacy_nlp) -> str:
+
     """
     remove all stop words from string
     requires nlp object from spacy module
     """
+
     cleaned = [word.text for word in spacy_nlp(raw_text) if not word.is_stop]  
     return ' '.join(cleaned)
 
-def is_stop_word(word: str, spacy_nlp):
+def is_stop_word(word: str, spacy_nlp) -> bool:
+
     """
     check if word is a stop word
     requires nlp object from spacy module
     """
+
     return spacy_nlp(word)[0].is_stop
 
-def get_pos(text: str, single_word:bool, spacy_nlp):
+def get_pos(text: str, single_word: bool, spacy_nlp):
+
     """
     get parts of speech from a string. Retuns a list
     requires nlp object from spacy module
     """
+
     if single_word:
         pos = spacy_nlp(text)[0].tag_
     else:
         pos = [token.tag_ for token in spacy_nlp(text)]
     return pos
     
-def singularize(raw_text: str, spacy_nlp):
+def singularize(raw_text: str, spacy_nlp) -> str:
+
     """
     normalize all plural words to be singular
     requires nlp object from spacy module
     """
+
     converted = raw_text
     for token in spacy_nlp(raw_text):
         if token.tag_ == 'NNS':
             converted = converted.replace(token.text, 
-                        TextBlob(token.text).words.singularize()[0])
+                TextBlob(token.text).words.singularize()[0])
     
     return converted
 
-def translate_french(fr_responses: list, 
-    project_id: str, 
-    key_path: str, 
-    batch_size=128):
+def translate_french(
+    fr_responses: list,
+    project_id: str,
+    key_path: str,
+    batch_size: int = 128,
+) -> list:
+
     """
     Use google cloud api to batch translate french to english
     Assumes you have a project_id registered on google cloud
     key_path needs to be a json file with your credentials
     """
+
     from google.cloud import translate
     from math import ceil
     import os
